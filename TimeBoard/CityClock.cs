@@ -151,7 +151,7 @@ namespace TimeBoard
             City si = CityListBox.SelectedItem as City;
             if (si != null)
             {
-                TimeBoardPanel.timeProvider.GetCityInfo(si.id, PopulateCityDetails);
+                TimeBoardPanel.timeProvider.GetCityInfo(si.name, PopulateCityDetails);
                 set.isEditingMode = false;
             }
         }
@@ -248,7 +248,7 @@ namespace TimeBoard
                 gfx.DrawImage(set.CurrentType.closeBtn, set.CloseCross);
             }
 
-            if (City != null && City.Regions != null && !CityListBox.Visible)
+            if (City != null && !CityListBox.Visible)
             {
                 gfx.DrawString(City.offsetString, set.CurrentSize.Caption, caption, captionCenter, GlobalSettings.StringFormat);
                 gfx.DrawString(City.name, set.CurrentSize.Default, cityb, cityRect, format);

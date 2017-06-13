@@ -66,7 +66,7 @@ namespace TimeBoard
         #endregion
 
         #region Properties
-        public static YandexTimeProvider timeProvider;
+        public static ITimeProvider timeProvider;
         enum ApplyMode { Type, Scale, Theme }
 
         List<Button> scalesButtons = new List<Button>();
@@ -193,7 +193,7 @@ namespace TimeBoard
 
         private void InitTimeProvider()
         {
-            timeProvider = new YandexTimeProvider();
+            timeProvider = new GoogleTimeProvider();
         }
         private void InitButtonsLists()
         {

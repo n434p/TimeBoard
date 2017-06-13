@@ -21,7 +21,7 @@ namespace TimeBoard.Clocks
 
         protected DateTime GetLocalTime()
         {
-            return DateTime.UtcNow.AddMilliseconds(offset);
+            return DateTime.UtcNow.AddSeconds(offset);
         }
 
         public virtual void Draw(Graphics graphics)
