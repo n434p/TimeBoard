@@ -33,7 +33,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\OneDrive\Документи\ProtraderMCRelease64\My plug-ins\</OutputPath>
+    <OutputPath>..\..\..\..\Documents\ProtraderMCRelease64\My plug-ins\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -106,8 +106,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeProviders\GoogleTimeProvider.cs" />
     <Compile Include="TimeProviders\ITimeProvider.cs" />
-    <Compile Include="TimeProviders\PluginProxy.cs" />
-    <Compile Include="TimeProviders\YandexTimeProvider.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

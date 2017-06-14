@@ -12,7 +12,7 @@ namespace TimeBoard
     class Settings
     {
         [DataMember]
-        public List<string> citiesList = new List<string>() { "Dnipro Dnipropetrovsk Oblast Ukraine", "Kyiv Ukraine" };
+        public List<string> citiesList = new List<string>() { "Tokyo, Japan", "London, United Kingdom", "New York, NY, United States" };
         [DataMember]
         public ClockTheme clockTheme = ClockTheme.Dark;
         [DataMember]

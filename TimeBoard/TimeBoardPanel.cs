@@ -150,7 +150,7 @@ namespace TimeBoard
 
         void AddClock(string cityId)
         {
-            CityClock clock = new CityClock(set, cityId);
+            CityClock clock = new CityClock(set,cityId);
             clock.ClockRemoved += OnDeleteClockBtn_Click;
             clock.ClockEdited += Clock_ClockEdited;
 
@@ -197,12 +197,18 @@ namespace TimeBoard
         }
         private void InitButtonsLists()
         {
+            typesButtons.Clear();
+
             typesButtons.Add(analogTypeBtn);
             typesButtons.Add(digitalTypeBtn);
+
+            scalesButtons.Clear();
 
             scalesButtons.Add(sSizeBtn);
             scalesButtons.Add(mSizeBtn);
             scalesButtons.Add(lSizeBtn);
+
+            themesButtons.Clear();
 
             themesButtons.Add(darkThemeBtn);
             themesButtons.Add(lightThemeBtn);
@@ -338,7 +344,7 @@ namespace TimeBoard
         }
         private void OnAddClockBtn_Click(object sender, EventArgs e)
         {
-            if (!clocks.Any(c => c.City.id == null))
+            if (!clocks.Any(c => c.City.name == null))
             {
                 AddClock(null);
             }
@@ -391,7 +397,7 @@ namespace TimeBoard
                 set = new Settings();
 
             if(clocks.Count > 0)
-                set.citiesList = clocks.Where(cc => cc.City != null).Select(c => c.City.id).Reverse().ToList();
+                set.citiesList = clocks.Where(cc => cc.City != null).Select(c => c.City.name).Reverse().ToList();
 
             using (MemoryStream memoryStream = new MemoryStream())
             using (StreamReader reader = new StreamReader(memoryStream))
@@ -454,7 +460,7 @@ namespace TimeBoard
                     if(this.GetChildAtPoint(location) != clocksPanel || clocksPanel.GetChildAtPoint(location) != clock)
                     {
                         clock.EditMode = false;
-                        if (clock.City.id == null)
+                        if (clock.City.name == null)
                             DeleteClock(clock);
                     }
                 }

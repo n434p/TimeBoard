@@ -43,7 +43,7 @@ namespace TimeBoard
             }
             private set
             {
-                if (value != null && value.id != null)
+                if (value != null && value.name != null)
                 {
                     Clock = BaseClock.CreateClock(set,set.clockType, value.offset);
                     ApplyTheme();
@@ -69,21 +69,9 @@ namespace TimeBoard
             DoubleBuffered = true;
 
             Clock = BaseClock.CreateClock(set, set.clockType, 0);
-            Populate();
+            City.name = cityId;
 
-            if (cityId != null)
-            {
-                TimeBoardPanel.timeProvider.GetCityInfo(cityId, (city) =>
-                {
-                    PopulateCityDetails(city);
-                    TimeBoardPanel.timeProvider.GetCityList(city.name, (list) =>
-                    {
-                        PopulateCityList(list);
-                        SelectFirst();
-                    });
-                });
-            }
-           
+            Populate();
 
             CityListBox.SelectionChangeCommitted += CityListBox_SelectionChangeCommitted;
             CityListBox.TextUpdate += CityListBox_TextUpdate;
@@ -92,12 +80,37 @@ namespace TimeBoard
             ApplyTheme();
         }
 
+        protected override void OnCreateControl()
+        {
+            base.OnCreateControl();
+            RefreshInfo(City?.name);
+        }
+
+        internal void RefreshInfo(string cityId)
+        {
+            if (cityId != null)
+            {
+                TimeBoardPanel.timeProvider.GetCityInfo(cityId, (city) =>
+                {
+                    if (city == null)
+                        return;
+
+                    PopulateCityDetails(city);
+
+                    TimeBoardPanel.timeProvider.GetCityList(city.name, (list) =>
+                    {
+                        PopulateCityList(list);
+                        SelectFirst();
+                    });
+                });
+            }
+        }
 
         private void CityListBox_LostFocus(object sender, EventArgs e)
         {
             EditMode = false;
 
-            if(City.id == null)
+            if(City.name == null)
                 ClockRemoved(this, e);
         }
 
@@ -118,7 +131,7 @@ namespace TimeBoard
             if (CityListBox.Items.Count > 0 && CityListBox.SelectedItem == null)
             {
                 CityListBox.SelectedIndex = 0;
-                TimeBoardPanel.timeProvider.GetCityInfo((CityListBox.Items[0] as City).id, PopulateCityDetails);
+                TimeBoardPanel.timeProvider.GetCityInfo((CityListBox.Items[0] as City).name, PopulateCityDetails);
             }
         }
 
@@ -219,7 +232,7 @@ namespace TimeBoard
         {
             try
             {
-                if (CityListBox.Text.Length > 1 && EditMode)
+                if (CityListBox.Text.Length > 1 && EditMode && CityListBox.SelectedIndex == -1)
                 {
                     TimeBoardPanel.timeProvider.GetCityList(CityListBox.Text, PopulateCityList);
                 }
