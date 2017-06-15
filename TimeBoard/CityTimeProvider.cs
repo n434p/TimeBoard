@@ -35,13 +35,17 @@ namespace TimeBoard
                             {
                                 name = (string)x["name_ascii"],
                                 country = (string)x["country_name"],
-                                timezone = (string)x["timezone"],
+                                timezone = ((string)x["timezone"]).Replace('_',' '),
                                 location = string.Format(nfi, "{0},{1}", x["lat"], x["lng"])
                             }).ToList();
                         }
+                        catch (WebException)
+                        {                            
+                            PTLRuntime.NETScript.Controls.PTMCMessageBox.Show("Can't get data from API with search item [" + search + "].\nPlease check an internet connection.", "TimeBoard Plugin - Error - services.gisgraphy.com");
+                        }
                         catch (Exception ex)
                         {
-                            System.Windows.Forms.MessageBox.Show(ex.Message, "TimeBoard Plugin - Error - services.gisgraphy.com");
+                            PTLRuntime.NETScript.Controls.PTMCMessageBox.Show("Something wrong while resolving [" + search + "].\n"+ex.Message, "TimeBoard Plugin - Error - services.gisgraphy.com");
                         }
                         return list;
                     }
@@ -64,9 +68,13 @@ namespace TimeBoard
                             var timezoneString = wc.DownloadString(new Uri(timezoneUri));
                             offset = (int)JObject.Parse(timezoneString)["rawOffset"] + (int)JObject.Parse(timezoneString)["dstOffset"];
                         }
+                        catch (WebException)
+                        {
+                            PTLRuntime.NETScript.Controls.PTMCMessageBox.Show("Can't get data from API with search item [" + city + "].\nPlease check an internet connection.", "TimeBoard Plugin - Error - Google API Timezone");
+                        }
                         catch (Exception ex)
                         {
-                            System.Windows.Forms.MessageBox.Show(ex.Message, "TimeBoard Plugin - Error - Google API Timezone");
+                            PTLRuntime.NETScript.Controls.PTMCMessageBox.Show("Something wrong while resolving [" + city + "].\n" + ex.Message, "TimeBoard Plugin - Error - Google API Timezone");
                         }
                         return offset;
                     }

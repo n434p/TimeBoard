@@ -190,7 +190,7 @@ namespace TimeBoard
 
         void CityListBox_TextUpdate(object sender, EventArgs e)
         {
-            CityListBox.DroppedDown = CityListBox.SelectedIndex == -1 && CityListBox.Items.Count > 0 && CityListBox.Text.Length > 2;
+            CityListBox.DroppedDown = CityListBox.SelectedIndex == -1 && CityListBox.Items.Count > 0 && CityListBox.Text.Length > 1;
             textUpdated = true;
         }
 
@@ -203,7 +203,7 @@ namespace TimeBoard
         {
             try
             {
-                if (CityListBox.Text.Length > 2 && textUpdated && CityListBox.SelectedIndex == -1)
+                if (CityListBox.Text.Length > 1 && textUpdated && CityListBox.SelectedIndex == -1)
                 {
                     textUpdated = false;
                     PopulateCityList(await TimeBoardPanel.timeProvider.GetCityList(CityListBox.Text));

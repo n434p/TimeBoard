@@ -33,7 +33,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\Documents\ProtraderMCRelease64\My plug-ins\</OutputPath>
+    <OutputPath>..\..\..\..\OneDrive\Документи\ProtraderMCRelease64\My plug-ins\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -55,10 +55,6 @@
   <ItemGroup>
     <Reference Include="Commons">
       <HintPath>..\..\..\..\AppData\Roaming\ProtraderMCRelease64\Commons.dll</HintPath>
-    </Reference>
-    <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
-      <HintPath>..\packages\HtmlAgilityPack.1.4.9.5\lib\Net45\HtmlAgilityPack.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\..\AppData\Roaming\ProtraderMCRelease64\Newtonsoft.Json.dll</HintPath>

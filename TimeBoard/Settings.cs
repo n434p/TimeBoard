@@ -13,10 +13,11 @@ namespace TimeBoard
     {
         [DataMember]
         public List<City> citiesList = new List<City>()
-        {
-            new City() { name = "Tokyo", country = "Japan", location = "35.68949890136719,139.69171142578125", offset = 32400, timezone="Asia/Tokyo" },
-            new City() { name = "New York City", country = "United States", location = "40.714271545410156,-74.00596618652344", offset = -18000, timezone="America/New_York" },
-            new City() { name = "London", country = "United Kingdom", location = "51.50852966308594,-0.12574000656604767", offset = 0, timezone="Europe/London" }
+        {            
+            new City() { name = "Sao Paulo", country = "Brazil", location = "-23.5475006103516,-46.6361083984375", offset = -10800, timezone="America/Sao Paulo" }
+            //new City() { name = "Tokyo", country = "Japan", location = "35.68949890136719,139.69171142578125", offset = 32400, timezone="Asia/Tokyo" },
+            //new City() { name = "New York City", country = "United States", location = "40.714271545410156,-74.00596618652344", offset = -18000, timezone="America/New_York" },
+            //new City() { name = "London", country = "United Kingdom", location = "51.50852966308594,-0.12574000656604767", offset = 0, timezone="Europe/London" }
         };
 
         [DataMember]
@@ -24,7 +25,7 @@ namespace TimeBoard
         [DataMember]
         public ClockScale clockScale = ClockScale.Middle;
         [DataMember]
-        public ClockType clockType = ClockType.Analog;
+        public ClockType clockType = ClockType.Digital;
 
         public bool isEditingMode = false;
 

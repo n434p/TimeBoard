@@ -50,6 +50,10 @@ namespace TimeBoard
 
         public void Populate()
         {
+            // reconnection case
+            if (dispatcherTimer != null)
+                return;
+
             set =  set ?? new Settings();
             SetClocks();
             KeyPreview = true;
