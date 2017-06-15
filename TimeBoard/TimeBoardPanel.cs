@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Threading;
-using TimeBoard.TimeProviders;
 using TimeBoard.Clocks;
 using com.pfsoft.proftrading.commons.external;
 using PTLRuntime.NETScript.Settings;
@@ -51,9 +50,6 @@ namespace TimeBoard
 
         public void Populate()
         {
-            var p = PTLRuntime.NETScript.Application.Connection.CurrentConnection;
-            var e = PTLRuntime.NETScript.Application.Connection.ProxyEnabled;
-
             set =  set ?? new Settings();
             SetClocks();
             KeyPreview = true;
@@ -66,7 +62,7 @@ namespace TimeBoard
         #endregion
 
         #region Properties
-        public static ITimeProvider timeProvider;
+        public static CityTimeProvider timeProvider;
         enum ApplyMode { Type, Scale, Theme }
 
         List<Button> scalesButtons = new List<Button>();
@@ -148,9 +144,9 @@ namespace TimeBoard
 
         }
 
-        void AddClock(string cityId)
+        void AddClock(City city)
         {
-            CityClock clock = new CityClock(set,cityId);
+            CityClock clock = new CityClock(set,city);
             clock.ClockRemoved += OnDeleteClockBtn_Click;
             clock.ClockEdited += Clock_ClockEdited;
 
@@ -161,7 +157,7 @@ namespace TimeBoard
 
             clocks.Insert(0, clock);
 
-            clock.EditMode = true;
+            clock.EditMode = city == null;
         }
 
         void DeleteClock(CityClock curCityClock)
@@ -185,15 +181,17 @@ namespace TimeBoard
             clocksPanel.Controls.Clear();
             clocks.Clear();
 
-            foreach (var cityName in set.citiesList)
+            foreach (var city in set.citiesList)
             {
-                AddClock(cityName);
+                AddClock(city);
             }
+
+            clocksPanel.Select();
         }
 
         private void InitTimeProvider()
         {
-            timeProvider = new GoogleTimeProvider();
+            timeProvider = new CityTimeProvider();
         }
         private void InitButtonsLists()
         {
@@ -397,7 +395,7 @@ namespace TimeBoard
                 set = new Settings();
 
             if(clocks.Count > 0)
-                set.citiesList = clocks.Where(cc => cc.City != null).Select(c => c.City.name).Reverse().ToList();
+                set.citiesList = clocks.Where(cc => cc.City != null).Select(c => c.City).Reverse().ToList();
 
             using (MemoryStream memoryStream = new MemoryStream())
             using (StreamReader reader = new StreamReader(memoryStream))

@@ -12,7 +12,13 @@ namespace TimeBoard
     class Settings
     {
         [DataMember]
-        public List<string> citiesList = new List<string>() { "Tokyo, Japan", "London, United Kingdom", "New York, NY, United States" };
+        public List<City> citiesList = new List<City>()
+        {
+            new City() { name = "Tokyo", country = "Japan", location = "35.68949890136719,139.69171142578125", offset = 32400, timezone="Asia/Tokyo" },
+            new City() { name = "New York City", country = "United States", location = "40.714271545410156,-74.00596618652344", offset = -18000, timezone="America/New_York" },
+            new City() { name = "London", country = "United Kingdom", location = "51.50852966308594,-0.12574000656604767", offset = 0, timezone="Europe/London" }
+        };
+
         [DataMember]
         public ClockTheme clockTheme = ClockTheme.Dark;
         [DataMember]

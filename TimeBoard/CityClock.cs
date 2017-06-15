@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Net;
 using System.Windows.Forms;
 using TimeBoard.Clocks;
 
@@ -59,17 +58,18 @@ namespace TimeBoard
         Point captionCenter;
         StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Near, Alignment = StringAlignment.Center};
         Settings set;
+        bool textUpdated;
 
         #endregion
 
-        public CityClock(Settings settings, string cityId)
+        public CityClock(Settings settings, City city)
         {
             set = settings;
             ///avoid panel flickering
             DoubleBuffered = true;
 
             Clock = BaseClock.CreateClock(set, set.clockType, 0);
-            City.name = cityId;
+            City = city;
 
             Populate();
 
@@ -83,26 +83,16 @@ namespace TimeBoard
         protected override void OnCreateControl()
         {
             base.OnCreateControl();
-            RefreshInfo(City?.name);
+            RefreshList();
         }
 
-        internal void RefreshInfo(string cityId)
+        async void RefreshList()
         {
-            if (cityId != null)
+            if (City?.name != null)
             {
-                TimeBoardPanel.timeProvider.GetCityInfo(cityId, (city) =>
-                {
-                    if (city == null)
-                        return;
-
-                    PopulateCityDetails(city);
-
-                    TimeBoardPanel.timeProvider.GetCityList(city.name, (list) =>
-                    {
-                        PopulateCityList(list);
-                        SelectFirst();
-                    });
-                });
+                EditMode = false;
+                PopulateCityList(await TimeBoardPanel.timeProvider.GetCityList(City.name));
+                SelectFirst();
             }
         }
 
@@ -110,7 +100,7 @@ namespace TimeBoard
         {
             EditMode = false;
 
-            if(City.name == null)
+            if (City.name == null)
                 ClockRemoved(this, e);
         }
 
@@ -131,7 +121,6 @@ namespace TimeBoard
             if (CityListBox.Items.Count > 0 && CityListBox.SelectedItem == null)
             {
                 CityListBox.SelectedIndex = 0;
-                TimeBoardPanel.timeProvider.GetCityInfo((CityListBox.Items[0] as City).name, PopulateCityDetails);
             }
         }
 
@@ -159,22 +148,21 @@ namespace TimeBoard
 
         #region Misc
 
-        void CityListBox_SelectionChangeCommitted(object sender, EventArgs e)
+        async void CityListBox_SelectionChangeCommitted(object sender, EventArgs e)
         {
             City si = CityListBox.SelectedItem as City;
             if (si != null)
             {
-                TimeBoardPanel.timeProvider.GetCityInfo(si.name, PopulateCityDetails);
+                si.offset = await TimeBoardPanel.timeProvider.GetCityTimeOffset(si);
+                City = si;
+
                 set.isEditingMode = false;
+                EditMode = false;
             }
         }
 
         void PopulateCityList(List<City> list)
         {
-            if (this.InvokeRequired)
-                this.BeginInvoke((MethodInvoker)(delegate { PopulateCityList(list); }));
-            else
-            {
                 if (list == null)
                     return;
 
@@ -196,31 +184,14 @@ namespace TimeBoard
                     CityListBox.Items.Add(items[i]);
                 }
 
-                if(!EditMode)
+                if (!EditMode)
                     SelectFirst();
-            }
-        }
-
-        private void PopulateCityDetails(City city)
-        {
-            if (this.InvokeRequired)
-                this.BeginInvoke((MethodInvoker)(delegate { PopulateCityDetails(city); }));
-            else
-            {
-                if (city == null)
-                    return;
-
-                Invoke((Action)(() => {
-                    EditMode = false;
-                    City = city;
-                    CityListBox.SelectedIndex = CityListBox.FindString(city.name);
-                }));
-            }
         }
 
         void CityListBox_TextUpdate(object sender, EventArgs e)
         {
-            CityListBox.DroppedDown = CityListBox.Items.Count > 0;
+            CityListBox.DroppedDown = CityListBox.SelectedIndex == -1 && CityListBox.Items.Count > 0 && CityListBox.Text.Length > 2;
+            textUpdated = true;
         }
 
         private void DeleteClockBtn_Click(object sender, EventArgs e)
@@ -228,13 +199,14 @@ namespace TimeBoard
             ClockRemoved(this, e);
         }
 
-        public void FillCityList()
+        public async void FillCityList()
         {
             try
             {
-                if (CityListBox.Text.Length > 1 && EditMode && CityListBox.SelectedIndex == -1)
+                if (CityListBox.Text.Length > 2 && textUpdated && CityListBox.SelectedIndex == -1)
                 {
-                    TimeBoardPanel.timeProvider.GetCityList(CityListBox.Text, PopulateCityList);
+                    textUpdated = false;
+                    PopulateCityList(await TimeBoardPanel.timeProvider.GetCityList(CityListBox.Text));
                 }
             }
             catch
@@ -264,7 +236,7 @@ namespace TimeBoard
             if (City != null && !CityListBox.Visible)
             {
                 gfx.DrawString(City.offsetString, set.CurrentSize.Caption, caption, captionCenter, GlobalSettings.StringFormat);
-                gfx.DrawString(City.name, set.CurrentSize.Default, cityb, cityRect, format);
+                gfx.DrawString(City.name+"\n"+City.country, set.CurrentSize.Default, cityb, cityRect, format);
             }
 
         }
