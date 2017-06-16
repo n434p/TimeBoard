@@ -13,6 +13,7 @@ namespace TimeBoard
 
         ComboBox CityListBox = new ComboBox();
         Label deleteClockBtn = new Label();
+        public List<City> cities = new List<City>();
 
         public event EventHandler ClockRemoved = delegate { };
         public event EventHandler ClockEdited = delegate { };
@@ -86,12 +87,12 @@ namespace TimeBoard
             RefreshList();
         }
 
-        void RefreshList()
+        public void RefreshList()
         {
             if (City?.name != null)
             {
-                EditMode = false;
-                PopulateCityList(City.name);
+                EditMode = false; 
+                RefreshComboBoxList();
                 SelectFirst();
             }
         }
@@ -163,41 +164,17 @@ namespace TimeBoard
                 }
                 catch (Exception ex)
                 {
-                    if (ex is System.Net.WebException)
-                    {
-                        PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Can't get data from API with search item [" + si + "].\nPlease check an internet connection.", "TimeBoard Plugin - Error - Google API Timezone");
-                    }
-                    else
-                    {
-                        PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Something wrong while resolving [" + si + "].\n" + ex.Message, "TimeBoard Plugin - Error - Google API Timezone");
-                    }
+                    PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal(ex.Message, "TimeBoard Plugin - Error - Google API Timezone");
                 }
             }
         }
 
-        async void PopulateCityList(string name)
+        void RefreshComboBoxList()
         {
-            List<City> list = null;
-            try
-            {
-                list = await TimeBoardPanel.timeProvider.GetCityList(name);
-            }
-            catch (Exception ex)
-            {
-                if (ex is System.Net.WebException)
-                {
-                    PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Can't get data from API with search item [" + name + "].\nPlease check an internet connection.", "TimeBoard Plugin - Error - services.gisgraphy.com");
-                }
-                else
-                {
-                    PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Something wrong while resolving [" + name + "].\n" + ex.Message, "TimeBoard Plugin - Error - services.gisgraphy.com");
-                }
-            }
-
-            if (list == null)
+            if (cities == null)
                 return;
 
-            var items = list.ToArray();
+            var items = cities.ToArray();
 
             if (items.Length == 0) return;
 
@@ -219,6 +196,18 @@ namespace TimeBoard
                 SelectFirst();
         }
 
+        public async void PopulateCityList(string name)
+        {
+            try
+            {
+                cities = await TimeBoardPanel.timeProvider.GetCityList(name);
+            }
+            catch (Exception ex)
+            {
+                PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal(ex.Message, "TimeBoard Plugin - Error - services.gisgraphy.com");
+            }
+        }
+
         void CityListBox_TextUpdate(object sender, EventArgs e)
         {
             CityListBox.DroppedDown = CityListBox.SelectedIndex == -1 && CityListBox.Items.Count > 0 && CityListBox.Text.Length > 1;
@@ -236,6 +225,7 @@ namespace TimeBoard
             {
                 textUpdated = false;
                 PopulateCityList(CityListBox.Text);
+                RefreshComboBoxList();
             }
         }
 

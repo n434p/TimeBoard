@@ -22,25 +22,36 @@ namespace TimeBoard
             return await Task.Factory.StartNew(() =>
             {
                 List<City> list = null;
-                var searchUriString = citiesListRequestPrefix + search;
-                string str = null;
-
-                using (WebClient wc = new WebClient() { Encoding = Encoding.UTF8 })
+                try
                 {
-                    str = wc.DownloadString(new Uri(searchUriString));
-                }
+                    var searchUriString = citiesListRequestPrefix + search;
+                    string str = null;
 
-                if (str != null)
-                {
-                    var res = JObject.Parse(str);
-
-                    list = res["response"]["docs"].Values<JObject>().Select(x => new City
+                    using (WebClient wc = new WebClient() { Encoding = Encoding.UTF8 })
                     {
-                        name = (string)x["name_ascii"],
-                        country = (string)x["country_name"],
-                        timezone = ((string)x["timezone"]).Replace('_', ' '),
-                        location = string.Format(nfi, "{0},{1}", x["lat"], x["lng"])
-                    }).ToList();
+                        str = wc.DownloadString(new Uri(searchUriString));
+                    }
+
+                    if (str != null)
+                    {
+                        var res = JObject.Parse(str);
+
+                        list = res["response"]["docs"].Values<JObject>().Select(x => new City
+                        {
+                            name = (string)x["name_ascii"],
+                            country = (string)x["country_name"],
+                            timezone = ((string)x["timezone"]).Replace('_', ' '),
+                            location = string.Format(nfi, "{0},{1}", x["lat"], x["lng"])
+                        }).ToList();
+                    }
+                }
+                catch (WebException ex)
+                {
+                    throw new Exception("Can't get data from API with search item [" + search + "].\nPlease check an internet connection.", ex) { Source = search };
+                }
+                catch (Exception x)
+                {
+                    throw new Exception("Something wrong while resolving[" + search + "].\n", x) { Source = search };
                 }
                 return list;
             });
@@ -51,18 +62,28 @@ namespace TimeBoard
             return await Task.Factory.StartNew(() =>
             {
                 int offset = 0;
-                var timezoneUri = timezoneRequesPrefix + city.location + "&timestamp=" + ConvertToUnixTimestamp(DateTime.UtcNow);
-
-                string timezoneString = null;
-
-                using (WebClient wc = new WebClient() { Encoding = Encoding.UTF8 })
+                try
                 {
-                    timezoneString = wc.DownloadString(new Uri(timezoneUri));
+                    var timezoneUri = timezoneRequesPrefix + city.location + "&timestamp=" + ConvertToUnixTimestamp(DateTime.UtcNow);
+
+                    string timezoneString = null;
+
+                    using (WebClient wc = new WebClient() { Encoding = Encoding.UTF8 })
+                    {
+                        timezoneString = wc.DownloadString(new Uri(timezoneUri));
+                    }
+
+                    if (timezoneString != null)
+                        offset = (int)JObject.Parse(timezoneString)["rawOffset"] + (int)JObject.Parse(timezoneString)["dstOffset"];
                 }
-
-                if (timezoneString != null)
-                    offset = (int)JObject.Parse(timezoneString)["rawOffset"] + (int)JObject.Parse(timezoneString)["dstOffset"];
-
+                catch (WebException ex)
+                {
+                    throw new Exception("Can't get data from API with search item [" + city + "].\nPlease check an internet connection.", ex) { Source = city.ToString()};
+                }
+                catch (Exception x)
+                {
+                    throw new Exception("Something wrong while resolving[" + city + "].\n", x) { Source = city.ToString() };
+                }
                 return offset;
             });
         }

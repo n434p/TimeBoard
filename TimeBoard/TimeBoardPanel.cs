@@ -9,6 +9,7 @@ using PTLRuntime.NETScript.Settings;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace TimeBoard
 {
@@ -148,7 +149,7 @@ namespace TimeBoard
 
         }
 
-        void AddClock(City city)
+        CityClock AddClock(City city)
         {
             CityClock clock = new CityClock(set,city);
             clock.ClockRemoved += OnDeleteClockBtn_Click;
@@ -162,6 +163,8 @@ namespace TimeBoard
             clocks.Insert(0, clock);
 
             clock.EditMode = city == null;
+
+            return clock;
         }
 
         void DeleteClock(CityClock curCityClock)
@@ -185,9 +188,27 @@ namespace TimeBoard
             clocksPanel.Controls.Clear();
             clocks.Clear();
 
+            List<Task> tasks = new List<Task>();
+
             foreach (var city in set.citiesList)
             {
-                AddClock(city);
+                var cc = AddClock(city);
+                tasks.Add(Task.Factory.StartNew(() => {cc.cities = TimeBoardPanel.timeProvider.GetCityList(cc.City.name).Result;}));
+            }
+
+            try
+            {
+                Task.WaitAll(tasks.ToArray());
+            }
+
+            catch(AggregateException ex)
+            {
+                string mes = "";
+                foreach (var item in ex.InnerExceptions)
+                {
+                    mes += item.InnerException?.Source +"\n";
+                }
+                PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Can't get data from API with search items:\n" + mes + "Please check an internet connection.", "TimeBoard - Error - Set Default Clocks");
             }
 
             clocksPanel.Select();
