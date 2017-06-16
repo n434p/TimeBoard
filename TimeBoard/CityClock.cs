@@ -86,12 +86,12 @@ namespace TimeBoard
             RefreshList();
         }
 
-        async void RefreshList()
+        void RefreshList()
         {
             if (City?.name != null)
             {
                 EditMode = false;
-                PopulateCityList(await TimeBoardPanel.timeProvider.GetCityList(City.name));
+                PopulateCityList(City.name);
                 SelectFirst();
             }
         }
@@ -151,41 +151,72 @@ namespace TimeBoard
         async void CityListBox_SelectionChangeCommitted(object sender, EventArgs e)
         {
             City si = CityListBox.SelectedItem as City;
-            if (si != null)
-            {
-                si.offset = await TimeBoardPanel.timeProvider.GetCityTimeOffset(si);
-                City = si;
+            EditMode = false;
 
-                set.isEditingMode = false;
-                EditMode = false;
+            if (si != City)
+            {
+                try
+                {
+                    int offset = await TimeBoardPanel.timeProvider.GetCityTimeOffset(si);
+                    City = si;
+                    City.offset = offset;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is System.Net.WebException)
+                    {
+                        PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Can't get data from API with search item [" + si + "].\nPlease check an internet connection.", "TimeBoard Plugin - Error - Google API Timezone");
+                    }
+                    else
+                    {
+                        PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Something wrong while resolving [" + si + "].\n" + ex.Message, "TimeBoard Plugin - Error - Google API Timezone");
+                    }
+                }
             }
         }
 
-        void PopulateCityList(List<City> list)
+        async void PopulateCityList(string name)
         {
-                if (list == null)
-                    return;
-
-                var items = list.ToArray();
-
-                if (items.Length == 0) return;
-
-                Cursor.Current = Cursors.Default;
-
-                var c1 = CityListBox.Items.Count;
-
-                for (int i = 0; i < c1; i++)
+            List<City> list = null;
+            try
+            {
+                list = await TimeBoardPanel.timeProvider.GetCityList(name);
+            }
+            catch (Exception ex)
+            {
+                if (ex is System.Net.WebException)
                 {
-                    CityListBox.Items.RemoveAt(0);
+                    PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Can't get data from API with search item [" + name + "].\nPlease check an internet connection.", "TimeBoard Plugin - Error - services.gisgraphy.com");
                 }
-
-                for (int i = 0; i < items.Length; i++)
+                else
                 {
-                    CityListBox.Items.Add(items[i]);
+                    PTLRuntime.NETScript.Controls.PTMCMessageBox.ShowNonModal("Something wrong while resolving [" + name + "].\n" + ex.Message, "TimeBoard Plugin - Error - services.gisgraphy.com");
                 }
+            }
 
-                if (!EditMode)
-                    SelectFirst();
+            if (list == null)
+                return;
+
+            var items = list.ToArray();
+
+            if (items.Length == 0) return;
+
+            Cursor.Current = Cursors.Default;
+
+            var c1 = CityListBox.Items.Count;
+
+            for (int i = 0; i < c1; i++)
+            {
+                CityListBox.Items.RemoveAt(0);
+            }
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                CityListBox.Items.Add(items[i]);
+            }
+
+            if (!EditMode)
+                SelectFirst();
         }
 
         void CityListBox_TextUpdate(object sender, EventArgs e)
@@ -199,19 +230,12 @@ namespace TimeBoard
             ClockRemoved(this, e);
         }
 
-        public async void FillCityList()
+        public void FillCityList()
         {
-            try
+            if (CityListBox.Text.Length > 1 && textUpdated && CityListBox.SelectedIndex == -1)
             {
-                if (CityListBox.Text.Length > 1 && textUpdated && CityListBox.SelectedIndex == -1)
-                {
-                    textUpdated = false;
-                    PopulateCityList(await TimeBoardPanel.timeProvider.GetCityList(CityListBox.Text));
-                }
-            }
-            catch
-            {
-
+                textUpdated = false;
+                PopulateCityList(CityListBox.Text);
             }
         }
 
